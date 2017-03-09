@@ -1,0 +1,8 @@
+dataset: dataset-test.mat
+dataset_type: "mpii"
+global_scale: 1.0
+init_weights: models/mpii/snapshot-1030000
+location_refinement: true
+locref_stdev: 7.2801
+net_type: resnet_101
+scoremap_dir: test

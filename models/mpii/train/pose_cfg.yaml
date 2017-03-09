@@ -1,0 +1,29 @@
+dataset: /path/to/dataset.mat
+dataset_type: "mpii"
+
+pos_dist_thresh: 17
+global_scale: 0.8452830189
+scale_jitter_lo: 0.85
+scale_jitter_up: 1.15
+
+net_type: resnet_101
+init_weights: ../../pretrained/resnet_v1_101.ckpt
+
+location_refinement: true
+locref_huber_loss: true
+locref_loss_weight: 0.05
+locref_stdev: 7.2801
+
+intermediate_supervision: true
+intermediate_supervision_layer: 12
+
+max_input_size: 850
+multi_step:
+- [0.005, 10000]
+- [0.02, 430000]
+- [0.002, 730000]
+- [0.001, 1030000]
+display_iters: 20
+save_iters: 60000
+
+mirror: true
