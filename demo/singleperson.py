@@ -24,7 +24,7 @@ image_batch = data_to_input(image)
 
 # Compute prediction with the CNN
 outputs_np = sess.run(outputs, feed_dict={inputs: image_batch})
-scmap, locref = predict.extract_cnn_output(outputs_np, cfg)
+scmap, locref, _ = predict.extract_cnn_output(outputs_np, cfg)
 
 # Extract maximum scoring location from the heatmap, assume 1 person
 pose = predict.argmax_pose_predict(scmap, locref, cfg.stride)
