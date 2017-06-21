@@ -159,6 +159,6 @@ for imgidx = 1:length(annolist)
 end
 fprintf('\ndone\n');
 
-%assert(numImgs == length(annolist2));
+assert(numImgs == length(annolist2));
 
 end

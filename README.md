@@ -1,6 +1,6 @@
 # Human Pose Estimation with TensorFlow
 
-Here you can find the implementation of the CNN-based human body part detectors,
+Here you can find the implementation of the Human Body Pose Estimation algorithm,
 presented in the [DeeperCut](http://arxiv.org/abs/1605.03170) paper:
 
 **Eldar Insafutdinov, Leonid Pishchulin, Bjoern Andres, Mykhaylo Andriluka, and Bernt Schiele
@@ -16,7 +16,7 @@ We recommended to use `virtualenv`.
 You will also need to install the following Python packages:
 
 ```
-$ pip install scipy scikit-image matplotlib pyyaml easydict
+$ pip install scipy scikit-image matplotlib pyyaml easydict cython munkres
 ```
 
 When running training or prediction scripts, please make sure to set the environment variable
@@ -28,6 +28,8 @@ by setting the environment variable, eg. `CUDA_VISIBLE_DEVICES=0`.
 
 ## Demo code
 
+Single-Person (if there is only one person in the image)
+
 ```
 # Download pre-trained model files
 $ cd models/mpii
@@ -36,6 +38,21 @@ $ cd -
 
 # Run demo of single person pose estimation
 $ TF_CUDNN_USE_AUTOTUNE=0 python demo/singleperson.py
+```
+
+Multiple People
+
+```
+# Compile dependencies
+$ ./compile.sh
+
+# Download pre-trained model files
+$ cd models/coco
+$ ./download_models.sh
+$ cd -
+
+# Run demo of multi person pose estimation
+$ TF_CUDNN_USE_AUTOTUNE=0 python demo/demo_multiperson.py
 ```
 
 ## Training models

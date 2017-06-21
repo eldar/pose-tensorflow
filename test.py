@@ -38,7 +38,7 @@ def test_net(visualise, cache_scoremaps):
 
         outputs_np = sess.run(outputs, feed_dict={inputs: batch[Batch.inputs]})
 
-        scmap, locref = extract_cnn_output(outputs_np, cfg)
+        scmap, locref, pairwise_diff = extract_cnn_output(outputs_np, cfg)
 
         pose = argmax_pose_predict(scmap, locref, cfg.stride)
 

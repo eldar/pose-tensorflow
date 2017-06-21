@@ -21,6 +21,7 @@ def merge_batch(batches):
 class PennAction(PoseDataset):
     def __init__(self, cfg):
         cfg.all_joints = [[0], [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]]
+        cfg.all_joints_names = ["head", "shoulder", "elbow", "wrist", "hip", "knee", "ankle"]
         cfg.num_joints = 13
         super().__init__(cfg)
         self.add_extra_fields()

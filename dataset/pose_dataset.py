@@ -16,7 +16,9 @@ class Batch(Enum):
     part_score_weights = 2
     locref_targets = 3
     locref_mask = 4
-    data_item = 5
+    pairwise_targets = 5
+    pairwise_mask = 6
+    data_item = 7
 
 
 def mirror_joints_map(all_joints, num_joints):
@@ -40,6 +42,43 @@ def data_to_input(data):
     return np.expand_dims(data, axis=0).astype(float)
 
 
+def collect_pairwise_stats(joint_id, coords):
+    pairwise_stats = {}
+    for person_id in range(len(coords)):
+        num_joints = len(joint_id[person_id])
+        for k_start in range(num_joints):
+            j_id_start = joint_id[person_id][k_start]
+            joint_pt = coords[person_id][k_start, :]
+            j_x_start = np.asscalar(joint_pt[0])
+            j_y_start = np.asscalar(joint_pt[1])
+            for k_end in range(num_joints):
+                if k_start != k_end:
+                    j_id_end = joint_id[person_id][k_end]
+                    joint_pt = coords[person_id][k_end, :]
+                    j_x_end = np.asscalar(joint_pt[0])
+                    j_y_end = np.asscalar(joint_pt[1])
+                    if (j_id_start, j_id_end) not in pairwise_stats:
+                        pairwise_stats[(j_id_start, j_id_end)] = []
+                    pairwise_stats[(j_id_start, j_id_end)].append([j_x_end - j_x_start, j_y_end - j_y_start])
+    return pairwise_stats
+
+
+def load_pairwise_stats(cfg):
+    mat_stats = sio.loadmat(cfg.pairwise_stats_fn)
+    pairwise_stats = {}
+    for id in range(len(mat_stats['graph'])):
+        pair = tuple(mat_stats['graph'][id])
+        pairwise_stats[pair] = {"mean": mat_stats['means'][id], "std": mat_stats['std_devs'][id]}
+    for pair in pairwise_stats:
+        pairwise_stats[pair]["mean"] *= cfg.global_scale
+        pairwise_stats[pair]["std"] *= cfg.global_scale
+    return pairwise_stats
+
+
+def get_pairwise_index(j_id, j_id_end, num_joints):
+    return (num_joints - 1) * j_id + j_id_end - int(j_id < j_id_end)
+
+
 class DataItem:
     pass
 
@@ -47,12 +86,16 @@ class DataItem:
 class PoseDataset:
     def __init__(self, cfg):
         self.cfg = cfg
-        self.data = self.load_dataset()
+        self.data = self.load_dataset() if cfg.dataset else []
         self.num_images = len(self.data)
         if self.cfg.mirror:
             self.symmetric_joints = mirror_joints_map(cfg.all_joints, cfg.num_joints)
         self.curr_img = 0
         self.set_shuffle(cfg.shuffle)
+        self.set_pairwise_stats_collect(cfg.pairwise_stats_collect)
+        if self.cfg.pairwise_predict:
+            self.pairwise_stats = load_pairwise_stats(self.cfg)
+
 
     def load_dataset(self):
         cfg = self.cfg
@@ -91,8 +134,12 @@ class PoseDataset:
         self.has_gt = has_gt
         return data
 
+    def num_keypoints(self):
+        return self.cfg.num_joints
+
     def set_test_mode(self, test_mode):
         self.has_gt = not test_mode
+
 
     def set_shuffle(self, shuffle):
         self.shuffle = shuffle
@@ -100,10 +147,18 @@ class PoseDataset:
             assert not self.cfg.mirror
             self.image_indices = np.arange(self.num_images)
 
+
+    def set_pairwise_stats_collect(self, pairwise_stats_collect):
+        self.pairwise_stats_collect = pairwise_stats_collect
+        if self.pairwise_stats_collect:
+            assert self.get_scale() == 1.0
+
+
     def mirror_joint_coords(self, joints, image_width):
         # horizontally flip the x-coordinate, keep y unchanged
         joints[:, 1] = image_width - joints[:, 1] - 1
         return joints
+
 
     def mirror_joints(self, joints, symmetric_joints, image_width):
         # joint ids are 0 indexed
@@ -113,6 +168,7 @@ class PoseDataset:
         joint_id = joints[:, 0].astype(int)
         res[:, 0] = symmetric_joints[joint_id]
         return res
+
 
     def shuffle_images(self):
         num_images = self.num_images
@@ -124,11 +180,13 @@ class PoseDataset:
         else:
             self.image_indices = np.random.permutation(num_images)
 
+
     def num_training_samples(self):
         num = self.num_images
         if self.cfg.mirror:
             num *= 2
         return num
+
 
     def next_training_sample(self):
         if self.curr_img == 0 and self.shuffle:
@@ -142,8 +200,10 @@ class PoseDataset:
 
         return imidx, mirror
 
+
     def get_training_sample(self, imidx):
         return self.data[imidx]
+
 
     def get_scale(self):
         cfg = self.cfg
@@ -152,6 +212,7 @@ class PoseDataset:
             scale_jitter = rand.uniform(cfg.scale_jitter_lo, cfg.scale_jitter_up)
             scale *= scale_jitter
         return scale
+
 
     def next_batch(self):
         while True:
@@ -163,6 +224,7 @@ class PoseDataset:
                 continue
 
             return self.make_batch(data_item, scale, mirror)
+
 
     def is_valid_size(self, image_size, scale):
         im_width = image_size[2]
@@ -180,6 +242,7 @@ class PoseDataset:
                 return False
 
         return True
+
 
     def make_batch(self, data_item, scale, mirror):
         im_file = data_item.im_path
@@ -216,15 +279,10 @@ class PoseDataset:
             scaled_joints = [person_joints[:, 1:3] * scale for person_joints in joints]
 
             joint_id = [person_joints[:, 0].astype(int) for person_joints in joints]
-            part_score_targets, part_score_weights, locref_targets, locref_mask = self.compute_target_part_scoremap(
-                joint_id, scaled_joints, data_item, sm_size, scale)
+            batch = self.compute_targets_and_weights(joint_id, scaled_joints, data_item, sm_size, scale, batch)
 
-            batch.update({
-                Batch.part_score_targets: part_score_targets,
-                Batch.part_score_weights: part_score_weights,
-                Batch.locref_targets: locref_targets,
-                Batch.locref_mask: locref_mask
-            })
+            if self.pairwise_stats_collect:
+                data_item.pairwise_stats = collect_pairwise_stats(joint_id, scaled_joints)
 
         batch = {key: data_to_input(data) for (key, data) in batch.items()}
 
@@ -232,17 +290,44 @@ class PoseDataset:
 
         return batch
 
-    def compute_target_part_scoremap(self, joint_id, coords, data_item, size, scale):
+
+    def set_locref(self, locref_map, locref_mask, locref_scale, i, j, j_id, dx, dy):
+        locref_mask[j, i, j_id * 2 + 0] = 1
+        locref_mask[j, i, j_id * 2 + 1] = 1
+        locref_map[j, i, j_id * 2 + 0] = dx * locref_scale
+        locref_map[j, i, j_id * 2 + 1] = dy * locref_scale
+
+
+    def set_pairwise_map(self, pairwise_map, pairwise_mask, i, j, j_id, j_id_end, coords, pt_x, pt_y, person_id, k_end):
+        num_joints = self.cfg.num_joints
+        joint_pt = coords[person_id][k_end, :]
+        j_x_end = np.asscalar(joint_pt[0])
+        j_y_end = np.asscalar(joint_pt[1])
+        pair_id = get_pairwise_index(j_id, j_id_end, num_joints)
+        stats = self.pairwise_stats[(j_id, j_id_end)]
+        dx = j_x_end - pt_x
+        dy = j_y_end - pt_y
+        pairwise_mask[j, i, pair_id * 2 + 0] = 1
+        pairwise_mask[j, i, pair_id * 2 + 1] = 1
+        pairwise_map[j, i, pair_id * 2 + 0] = (dx - stats["mean"][0]) / stats["std"][0]
+        pairwise_map[j, i, pair_id * 2 + 1] = (dy - stats["mean"][1]) / stats["std"][1]
+
+
+    def compute_targets_and_weights(self, joint_id, coords, data_item, size, scale, batch):
         stride = self.cfg.stride
         dist_thresh = self.cfg.pos_dist_thresh * scale
         num_joints = self.cfg.num_joints
         half_stride = stride / 2
         scmap = np.zeros(cat([size, arr([num_joints])]))
-        locref_size = cat([size, arr([num_joints * 2])])
-        locref_mask = np.zeros(locref_size)
-        locref_map = np.zeros(locref_size)
 
-        locref_scale = 1.0 / self.cfg.locref_stdev
+        locref_shape = cat([size, arr([num_joints * 2])])
+        locref_mask = np.zeros(locref_shape)
+        locref_map = np.zeros(locref_shape)
+
+        pairwise_shape = cat([size, arr([num_joints * (num_joints - 1) * 2])])
+        pairwise_mask = np.zeros(pairwise_shape)
+        pairwise_map = np.zeros(pairwise_shape)
+
         dist_thresh_sq = dist_thresh ** 2
 
         width = size[1]
@@ -273,16 +358,43 @@ class PoseDataset:
                         dy = j_y - pt_y
                         dist = dx ** 2 + dy ** 2
                         # print(la.norm(diff))
+
                         if dist <= dist_thresh_sq:
+                            dist = dx ** 2 + dy ** 2
+                            locref_scale = 1.0 / self.cfg.locref_stdev
+                            current_normalized_dist = dist * locref_scale ** 2
+                            prev_normalized_dist = locref_map[j, i, j_id * 2 + 0] ** 2 + \
+                                                   locref_map[j, i, j_id * 2 + 1] ** 2
+                            update_scores = (scmap[j, i, j_id] == 0) or prev_normalized_dist > current_normalized_dist
+                            if self.cfg.location_refinement and update_scores:
+                                self.set_locref(locref_map, locref_mask, locref_scale, i, j, j_id, dx, dy)
+                            if self.cfg.pairwise_predict and update_scores:
+                                for k_end, j_id_end in enumerate(joint_id[person_id]):
+                                    if k != k_end:
+                                        self.set_pairwise_map(pairwise_map, pairwise_mask, i, j, j_id, j_id_end,
+                                                              coords, pt_x, pt_y, person_id, k_end)
                             scmap[j, i, j_id] = 1
-                            locref_mask[j, i, j_id * 2 + 0] = 1
-                            locref_mask[j, i, j_id * 2 + 1] = 1
-                            locref_map[j, i, j_id * 2 + 0] = dx * locref_scale
-                            locref_map[j, i, j_id * 2 + 1] = dy * locref_scale
 
-        weights = self.compute_scmap_weights(scmap.shape, joint_id, data_item)
+        scmap_weights = self.compute_scmap_weights(scmap.shape, joint_id, data_item)
 
-        return scmap, weights, locref_map, locref_mask
+        # Update batch
+        batch.update({
+            Batch.part_score_targets: scmap,
+            Batch.part_score_weights: scmap_weights
+        })
+        if self.cfg.location_refinement:
+            batch.update({
+                Batch.locref_targets: locref_map,
+                Batch.locref_mask: locref_mask
+            })
+        if self.cfg.pairwise_predict:
+            batch.update({
+                Batch.pairwise_targets: pairwise_map,
+                Batch.pairwise_mask: pairwise_mask
+            })
+
+        return batch
+
 
     def compute_scmap_weights(self, scmap_shape, joint_id, data_item):
         cfg = self.cfg
