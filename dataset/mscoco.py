@@ -31,6 +31,12 @@ def get_gt_visibilities(inFile, visibilities):
 
 
 class MSCOCO(PoseDataset):
+    def __init__(self, cfg):
+        cfg.all_joints = [[0], [2, 1], [4, 3], [6, 5], [8, 7],[10, 9], [12, 11], [14, 13], [16, 15]]
+        cfg.all_joints_names = ["nose", 'eye', 'ear', 'shoulder', 'elbow', 'hand', 'hip', 'knee', 'foot']
+        cfg.num_joints = 17
+        super().__init__(cfg)
+
     def load_dataset(self):
         dataset  = self.cfg.dataset
         dataset_phase = self.cfg.dataset_phase

@@ -7,12 +7,6 @@ location_refinement: true
 locref_stdev: 7.2801
 net_type: resnet_101
 
-num_joints: 17
-scoremap_dir: scoremaps_1200 
-
-all_joints: [[0], [2, 1], [4, 3], [6, 5], [8, 7], [10, 9], [12, 11], [14, 13],[16, 15]]
-all_joints_names: ["nose", 'eye', 'ear', 'shoulder', 'elbow', 'hand', 'hip', 'knee', 'foot']
-
 sparse_graph: [[0, 1], [0, 2], [1, 2], [2, 4], [1, 3], [0, 4], [0, 3], # head
                [0, 6], [1, 6], [2, 6], [3, 6], [4, 6], #shoulders
                [0, 5], [1, 5], [2, 5], [3, 5], [4, 5], #shoulders
@@ -24,10 +18,8 @@ sparse_graph: [[0, 1], [0, 2], [1, 2], [2, 4], [1, 3], [0, 4], [0, 3], # head
 
 scmap_threshold: 0.0
 
-all_joints_names: ["nose", 'eye', 'ear', 'shoulder', 'elbow', 'hand', 'hip', 'knee', 'foot']
 pairwise_predict: true
 pairwise_stats_fn: models/coco/pairwise/pairwise_stats.mat
-
 pairwise_model_dir: models/coco/pairwise/ 
 
 max_input_size: 850
