@@ -47,7 +47,8 @@ $ TF_CUDNN_USE_AUTOTUNE=0 CUDA_VISIBLE_DEVICES=0 python ../../../train.py
 
 ## Training a model with MS COCO dataset (Multi-Person)
 
-1. Download [MS COCO](http://mscoco.org/dataset/#download) train2014 set with keypoint annotations
+1. Download [MS COCO](http://mscoco.org/dataset/#download)
+train2014 set with keypoint and object instances annotations.
 
 2. Download pairwise statistics:
 ```
