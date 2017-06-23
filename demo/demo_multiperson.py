@@ -33,7 +33,7 @@ draw_multi = PersonDraw()
 sess, inputs, outputs = predict.setup_pose_prediction(cfg)
 
 # Read image from file
-file_name = "demo/image_multi.jpg"
+file_name = "demo/image_multi.png"
 image = imread(file_name, mode='RGB')
 
 image_batch = data_to_input(image)
@@ -49,8 +49,11 @@ person_conf_multi = get_person_conf_multicut(sm, unLab, unary_array, pos_array)
 img = np.copy(image)
 
 visim_multi = img.copy()
-draw_multi.draw(visim_multi, dataset, person_conf_multi)
 
-plt.imshow(visim_multi)
+fig = plt.imshow(visim_multi)
+draw_multi.draw(visim_multi, dataset, person_conf_multi)
+fig.axes.get_xaxis().set_visible(False)
+fig.axes.get_yaxis().set_visible(False)
+
 plt.show()
 visualize.waitforbuttonpress()

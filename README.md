@@ -1,11 +1,18 @@
 # Human Pose Estimation with TensorFlow
 
-Here you can find the implementation of the Human Body Pose Estimation algorithm,
-presented in the [DeeperCut](http://arxiv.org/abs/1605.03170) paper:
+![](images/teaser.png)
 
-**Eldar Insafutdinov, Leonid Pishchulin, Bjoern Andres, Mykhaylo Andriluka, and Bernt Schiele
-DeeperCut:  A Deeper, Stronger, and Faster Multi-Person Pose Estimation Model
+Here you can find the implementation of the Human Body Pose Estimation algorithm,
+presented in the [ArtTrack](http://arxiv.org/abs/1612.01465) and [DeeperCut](http://arxiv.org/abs/1605.03170) papers:
+
+**Eldar Insafutdinov, Leonid Pishchulin, Bjoern Andres, Mykhaylo Andriluka and Bernt Schiele
+DeeperCut:  A Deeper, Stronger, and Faster Multi-Person Pose Estimation Model.
 In _European Conference on Computer Vision (ECCV)_, 2016**
+
+**Eldar Insafutdinov, Mykhaylo Andriluka, Leonid Pishchulin, Siyu Tang, Evgeny Levinkov, Bjoern Andres and Bernt Schiele
+ArtTrack: Articulated Multi-person Tracking in the Wild.
+In _Conference on Computer Vision and Pattern Recognition (CVPR)_, 2017**
+
 For more information visit http://pose.mpi-inf.mpg.de
 
 Python 3 is required to run this code.
@@ -60,18 +67,19 @@ $ TF_CUDNN_USE_AUTOTUNE=0 python demo/demo_multiperson.py
 Please follow these [instructions](models/README.md)
 
 ## Citation
-Please cite Deep(er)Cut in your publications if it helps your research:
+Please cite ArtTrack and DeeperCut in your publications if it helps your research:
 
-    @article{insafutdinov2016deepercut,
-        author = {Eldar Insafutdinov and Leonid Pishchulin and Bjoern Andres and Mykhaylo Andriluka and Bernt Schiele},
-        url = {http://arxiv.org/abs/1605.03170}
+    @inproceedings{insafutdinov2017cvpr,
+	    title = {ArtTrack: Articulated Multi-person Tracking in the Wild},
+	    booktitle = {CVPR'17},
+	    url = {http://arxiv.org/abs/1612.01465},
+	    author = {Eldar Insafutdinov and Mykhaylo Andriluka and Leonid Pishchulin and Siyu Tang and Evgeny Levinkov and Bjoern Andres and Bernt Schiele}
+    }
+
+    @article{insafutdinov2016eccv,
         title = {DeeperCut: A Deeper, Stronger, and Faster Multi-Person Pose Estimation Model},
-        year = {2016}
+	    booktitle = {ECCV'16},
+        url = {http://arxiv.org/abs/1605.03170},
+        author = {Eldar Insafutdinov and Leonid Pishchulin and Bjoern Andres and Mykhaylo Andriluka and Bernt Schiele}
     }
 
-    @inproceedings{pishchulin16cvpr,
-	    title = {DeepCut: Joint Subset Partition and Labeling for Multi Person Pose Estimation},
-	    booktitle = {CVPR'16},
-	    url = {},
-	    author = {Leonid Pishchulin and Eldar Insafutdinov and Siyu Tang and Bjoern Andres and Mykhaylo Andriluka and Peter Gehler and Bernt Schiele}
-    }

@@ -2,7 +2,8 @@ import math
 import numpy as np
 
 import scipy.spatial
-import skimage.draw as draw
+
+import matplotlib.pyplot as plt
 
 import munkres
 
@@ -131,22 +132,9 @@ class PersonDraw:
 
                 if check_point(p1[0], p1[1], minx, miny, maxx, maxy) and check_point(p2[0], p2[1], minx, miny, maxx,
                                                                                      maxy):
-                    # cv2.line(visim, p1, p2, self.track_colors[color_idx][::-1], 3, cv2.CV_AA)
-                    rr, cc, val = draw.line_aa(p1[1], p1[0], p2[1], p2[0])
-                    color = np.array(self.track_colors[color_idx][::-1])
-                    val = np.reshape(val, (-1, 1))
-                    val = np.repeat(val, 3, axis=1)
-                    visim[rr, cc, :] = val * color
+                    color = np.array(self.track_colors[color_idx][::-1], dtype=np.float64) / 255.0
+                    plt.plot([p1[0], p2[0]], [p1[1], p2[1]], marker='o', linestyle='solid', linewidth=2.0, color=color)
 
-            for kidx in range(dataset.num_keypoints()):
-                cur_x = person_conf[pidx][kidx, 0]
-                cur_y = person_conf[pidx][kidx, 1]
-
-                if check_point(cur_x, cur_y, minx, miny, maxx, maxy):
-                    _npcircle(visim,
-                              cur_x, cur_y,
-                              marker_size,
-                              self.track_colors[color_idx][::-1], 0.2)
 
         self.prev_person_conf = person_conf
         self.prev_color_assignment = color_assignment
