@@ -26,13 +26,18 @@ def prediction_layer(cfg, input, name, num_outputs):
 def get_batch_spec(cfg):
     num_joints = cfg.num_joints
     batch_size = cfg.batch_size
-    return {
+    batch_spec = {
         Batch.inputs: [batch_size, None, None, 3],
         Batch.part_score_targets: [batch_size, None, None, num_joints],
-        Batch.part_score_weights: [batch_size, None, None, num_joints],
-        Batch.locref_targets: [batch_size, None, None, num_joints * 2],
-        Batch.locref_mask: [batch_size, None, None, num_joints * 2]
+        Batch.part_score_weights: [batch_size, None, None, num_joints]
     }
+    if cfg.location_refinement:
+        batch_spec[Batch.locref_targets] = [batch_size, None, None, num_joints * 2]
+        batch_spec[Batch.locref_mask] = [batch_size, None, None, num_joints * 2]
+    if cfg.pairwise_predict:
+        batch_spec[Batch.pairwise_targets] = [batch_size, None, None, num_joints * (num_joints - 1) * 2]
+        batch_spec[Batch.pairwise_mask] = [batch_size, None, None, num_joints * (num_joints - 1) * 2]
+    return batch_spec
 
 
 class PoseNet:
@@ -52,20 +57,23 @@ class PoseNet:
 
         return net, end_points
 
-    def prediction_layers(self, features, end_points, reuse=None):
+    def prediction_layers(self, features, end_points, reuse=None, no_interm=False, scope='pose'):
         cfg = self.cfg
 
         num_layers = re.findall("resnet_([0-9]*)", cfg.net_type)[0]
         layer_name = 'resnet_v1_{}'.format(num_layers) + '/block{}/unit_{}/bottleneck_v1'
 
         out = {}
-        with tf.variable_scope('pose', reuse=reuse):
+        with tf.variable_scope(scope, reuse=reuse):
             out['part_pred'] = prediction_layer(cfg, features, 'part_pred',
                                                 cfg.num_joints)
             if cfg.location_refinement:
                 out['locref'] = prediction_layer(cfg, features, 'locref_pred',
                                                  cfg.num_joints * 2)
-            if cfg.intermediate_supervision:
+            if cfg.pairwise_predict:
+                out['pairwise_pred'] = prediction_layer(cfg, features, 'pairwise_pred',
+                                                       cfg.num_joints * (cfg.num_joints - 1) * 2)
+            if cfg.intermediate_supervision and not no_interm:
                 interm_name = layer_name.format(3, cfg.intermediate_supervision_layer)
                 block_interm_out = end_points[interm_name]
                 out['part_pred_interm'] = prediction_layer(cfg, block_interm_out,
@@ -80,13 +88,19 @@ class PoseNet:
 
     def test(self, inputs):
         heads = self.get_net(inputs)
+        return self.add_test_layers(heads)
+
+    def add_test_layers(self, heads):
         prob = tf.sigmoid(heads['part_pred'])
-        return {'part_prob': prob, 'locref': heads['locref']}
+        outputs = {'part_prob': prob}
+        if self.cfg.location_refinement:
+            outputs['locref'] = heads['locref']
+        if self.cfg.pairwise_predict:
+            outputs['pairwise_pred'] = heads['pairwise_pred']
+        return outputs
 
-    def train(self, batch):
+    def part_detection_loss(self, heads, batch, locref, pairwise, intermediate):
         cfg = self.cfg
-
-        heads = self.get_net(batch[Batch.inputs])
 
         weigh_part_predictions = cfg.weigh_part_predictions
         part_score_weights = batch[Batch.part_score_weights] if weigh_part_predictions else 1.0
@@ -99,11 +113,11 @@ class PoseNet:
         loss = {}
         loss['part_loss'] = add_part_loss('part_pred')
         total_loss = loss['part_loss']
-        if cfg.intermediate_supervision:
+        if intermediate:
             loss['part_loss_interm'] = add_part_loss('part_pred_interm')
             total_loss = total_loss + loss['part_loss_interm']
 
-        if cfg.location_refinement:
+        if locref:
             locref_pred = heads['locref']
             locref_targets = batch[Batch.locref_targets]
             locref_weights = batch[Batch.locref_mask]
@@ -112,6 +126,26 @@ class PoseNet:
             loss['locref_loss'] = cfg.locref_loss_weight * loss_func(locref_targets, locref_pred, locref_weights)
             total_loss = total_loss + loss['locref_loss']
 
+        if pairwise:
+            pairwise_pred = heads['pairwise_pred']
+            pairwise_targets = batch[Batch.pairwise_targets]
+            pairwise_weights = batch[Batch.pairwise_mask]
+
+            loss_func = losses.huber_loss if cfg.pairwise_huber_loss else tf.losses.mean_squared_error
+            loss['pairwise_loss'] = cfg.pairwise_loss_weight * loss_func(pairwise_targets, pairwise_pred,
+                                                                         pairwise_weights)
+            total_loss = total_loss + loss['pairwise_loss']
+
         # loss['total_loss'] = slim.losses.get_total_loss(add_regularization_losses=params.regularize)
         loss['total_loss'] = total_loss
         return loss
+
+    def train(self, batch):
+        cfg = self.cfg
+
+        intermediate = cfg.intermediate_supervision
+        locref = cfg.location_refinement
+        pairwise = cfg.pairwise_predict
+
+        heads = self.get_net(batch[Batch.inputs])
+        return self.part_detection_loss(heads, batch, locref, pairwise, intermediate)

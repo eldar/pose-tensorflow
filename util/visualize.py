@@ -5,6 +5,7 @@ from scipy.misc import imresize
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 
 def _npcircle(image, cx, cy, radius, color, transparency=0.0):
@@ -73,6 +74,31 @@ def show_heatmaps(cfg, img, scmap, pose, cmap="jet"):
 
     plt.show()
 
+def show_arrows(cfg, img, pose, arrows):
+    fig = plt.figure()
+    a = fig.add_subplot(2, 2, 1)
+    plt.imshow(img)
+    a.set_title('Initial Image')
+
+
+    b = fig.add_subplot(2, 2, 2)
+    plt.imshow(img)
+    b.set_title('Predicted Pairwise Differences')
+
+    color_opt=['r', 'g', 'b', 'c', 'm', 'y', 'k']
+    joint_pairs = [(6, 5), (6, 11), (6, 8), (6, 15), (6, 0)]
+    color_legends = []
+    for id, joint_pair in enumerate(joint_pairs):
+        end_joint_side = ("r " if joint_pair[1] % 2 == 0 else "l ") if joint_pair[1] != 0 else ""
+        end_joint_name = end_joint_side + cfg.all_joints_names[int(math.ceil(joint_pair[1] / 2))]
+        start = arrows[joint_pair][0]
+        end = arrows[joint_pair][1]
+        b.arrow(start[0], start[1], end[0]-start[0], end[1]-start[1], head_width=3, head_length=6, fc=color_opt[id], ec=color_opt[id], label=end_joint_name)
+        color_legend = mpatches.Patch(color=color_opt[id], label=end_joint_name)
+        color_legends.append(color_legend)
+
+    plt.legend(handles=color_legends, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+    plt.show()
 
 def waitforbuttonpress():
     plt.waitforbuttonpress(timeout=1)

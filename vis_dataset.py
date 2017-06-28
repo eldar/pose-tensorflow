@@ -3,6 +3,8 @@ import logging
 import numpy as np
 from scipy.misc import imresize
 
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
 from config import load_config
