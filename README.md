@@ -23,7 +23,7 @@ We recommended to use `virtualenv`.
 You will also need to install the following Python packages:
 
 ```
-$ pip install scipy scikit-image matplotlib pyyaml easydict cython munkres
+$ pip3 install scipy scikit-image matplotlib pyyaml easydict cython munkres
 ```
 
 When running training or prediction scripts, please make sure to set the environment variable
@@ -44,7 +44,7 @@ $ ./download_models.sh
 $ cd -
 
 # Run demo of single person pose estimation
-$ TF_CUDNN_USE_AUTOTUNE=0 python demo/singleperson.py
+$ TF_CUDNN_USE_AUTOTUNE=0 python3 demo/singleperson.py
 ```
 
 Multiple People
@@ -59,7 +59,7 @@ $ ./download_models.sh
 $ cd -
 
 # Run demo of multi person pose estimation
-$ TF_CUDNN_USE_AUTOTUNE=0 python demo/demo_multiperson.py
+$ TF_CUDNN_USE_AUTOTUNE=0 python3 demo/demo_multiperson.py
 ```
 
 ## Training models

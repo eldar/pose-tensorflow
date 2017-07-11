@@ -42,7 +42,7 @@ dataset: `<path_to_dataset>/cropped/dataset.mat`
 
 ```
 $ cd models/mpii/train/
-$ TF_CUDNN_USE_AUTOTUNE=0 CUDA_VISIBLE_DEVICES=0 python ../../../train.py
+$ TF_CUDNN_USE_AUTOTUNE=0 CUDA_VISIBLE_DEVICES=0 python3 ../../../train.py
 ```
 
 ## Training a model with MS COCO dataset (Multi-Person)
@@ -67,7 +67,7 @@ dataset: `<path_to_mscoco>`
 
 ```
 $ cd models/coco/train/
-$ TF_CUDNN_USE_AUTOTUNE=0 CUDA_VISIBLE_DEVICES=0 python ../../../train.py
+$ TF_CUDNN_USE_AUTOTUNE=0 CUDA_VISIBLE_DEVICES=0 python3 ../../../train.py
 ```
 
 ## Training on your own dataset
