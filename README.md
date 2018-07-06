@@ -16,14 +16,15 @@ In _Conference on Computer Vision and Pattern Recognition (CVPR)_, 2017**
 For more information visit http://pose.mpi-inf.mpg.de
 
 Python 3 is required to run this code.
-First of all, you should install TensorFlow as described in the
-[official documentation](https://www.tensorflow.org/install/).
-We recommended to use `virtualenv`.
+On Linux, you may need to install the `python3-dev` and `python3-tk` packages.
 
-You will also need to install the following Python packages:
+We recommended using `virtualenv` to create an isolated Python environment.
+
+You will also need to install the Python packages listed in `requirements.txt`,
+including TensorFlow:
 
 ```
-$ pip3 install scipy scikit-image matplotlib pyyaml easydict cython munkres
+$ pip install -r requirements.txt
 ```
 
 When running training or prediction scripts, please make sure to set the environment variable
@@ -82,4 +83,3 @@ Please cite ArtTrack and DeeperCut in your publications if it helps your researc
         url = {http://arxiv.org/abs/1605.03170},
         author = {Eldar Insafutdinov and Leonid Pishchulin and Bjoern Andres and Mykhaylo Andriluka and Bernt Schiele}
     }
-
