@@ -28,7 +28,7 @@ void solve_nl_lmp_cpp(double *unValues, int un_H, int un_W,
                       uint16_t* pwIndices, int pwi_H, int pwi_W,
                       double* pwValues, int pwv_H, int pwv_W,
                       bool is_sparse_graph, bool solver_type, bool do_suppression, bool do_logit_transform,
-                      uint64_t *result)
+                      unsigned long long* result)
 {
   andres::View<uint16_t> pwind_view = get_view2d<uint16_t>(pwIndices, pwi_H, pwi_W);
   andres::View<double> un_view = get_view2d<double>(unValues, un_H, un_W);
@@ -65,7 +65,7 @@ void solve_nl_lmp_cpp(double *unValues, int un_H, int un_W,
   }
   assert(unLab.size() > 0);
 
-  andres::View<uint64_t> result_view = get_view2d<uint64_t>(result, un_H, 2);
+  andres::View<unsigned long long> result_view = get_view2d<unsigned long long>(result, un_H, 2);
   for(int k = 0; k < un_H; ++k)
   {
     result_view(k, 0) = unLab(k, 0);
