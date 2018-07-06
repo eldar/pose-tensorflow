@@ -24,7 +24,7 @@ def solve_nl_lmp(np.ndarray[np.float64_t, ndim=2, mode="c"] unary_array,
                  is_sparse_graph, solver_type, do_suppression, logit_in_solver):
 
 
-  cdef np.ndarray[np.uint64_t, ndim=2, mode="c"] result = np.zeros([unary_array.shape[0], 2], dtype=np.uint64)
+  cdef np.ndarray[np.ulonglong_t, ndim=2, mode="c"] result = np.zeros([unary_array.shape[0], 2], dtype=np.ulonglong)
 
   solve_nl_lmp_cpp(&unary_array[0, 0], unary_array.shape[0], unary_array.shape[1],
                    &pwidx_array[0, 0], pwidx_array.shape[0], pwidx_array.shape[1],

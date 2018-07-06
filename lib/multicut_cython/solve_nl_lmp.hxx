@@ -5,19 +5,21 @@
 
 #include <algorithm>
 
+#include <array>
+
 #include <vector>
 
 #include <iostream>
 
 using namespace std;
 
-template <typename T> 
+template <typename T>
 andres::View<T> get_view2d(T *gridData, int grid_height, int grid_width)
 {
   std::array<size_t, 2> shape;
   shape[0] = grid_height;
   shape[1] = grid_width;
-  andres::View<T> view(shape.begin(), shape.end(), gridData, andres::FirstMajorOrder); 
+  andres::View<T> view(shape.begin(), shape.end(), gridData, andres::FirstMajorOrder);
   return view;
 }
 
@@ -58,7 +60,7 @@ void solve_nl_lmp_cpp(double *unValues, int un_H, int un_W,
     else {
       //unLab = solve_lmp_complete_graph(un_view, pwind_view, pw_view, do_suppression);
 
-      unLab = solve_nl_lmp_complete_graph(un_view, pwind_view, pw_view, method, do_logit_transform, do_suppression);  
+      unLab = solve_nl_lmp_complete_graph(un_view, pwind_view, pw_view, method, do_logit_transform, do_suppression);
     }
   }
   assert(unLab.size() > 0);
