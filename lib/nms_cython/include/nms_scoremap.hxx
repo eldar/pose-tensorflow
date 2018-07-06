@@ -4,6 +4,8 @@
 
 // #include <numpy/arrayobject.h>
 
+#include <array>
+
 #include <vector>
 
 #include <iostream>
@@ -25,11 +27,11 @@ std::vector<int> nms_grid_cpp(const float *unProbValues, size_t height, size_t w
   // cout << "width: " << width << endl;
     const size_t num_locs = height * width;
 
-    // MA: is this row or column major? 
+    // MA: is this row or column major?
     std::array<size_t, 2> shape;
     shape[0] = grid_height;
     shape[1] = grid_width;
-    andres::View<unsigned char> grid(shape.begin(), shape.end(), gridData); 
+    andres::View<unsigned char> grid(shape.begin(), shape.end(), gridData);
 
     std::vector<int> indices(height*width);
     for(int i = 0; i < num_locs; ++i)
@@ -100,7 +102,7 @@ std::vector<int> nms_grid_cpp_test(float *unProbValues, size_t height, size_t wi
   std::array<size_t, 2> shape;
   shape[0] = height;
   shape[1] = width;
-  andres::View<float> grid(shape.begin(), shape.end(), unProbValues); 
+  andres::View<float> grid(shape.begin(), shape.end(), unProbValues);
 
   std::cout << "Hello fuck! " << height << " " << width << std::endl;
   std::vector<int> result;

@@ -1,0 +1,11 @@
+__pycache__
+*.so
+lib/coco/PythonAPI/build/
+lib/coco/PythonAPI/pycocotools/_mask.c
+lib/multicut_cython/build/
+lib/multicut_cython/multicut.cpp
+lib/nms_cython/build/
+lib/nms_cython/nms_grid.cpp
+models/mpii/mpii-single-resnet-101.*
+models/coco/coco-resnet-101.*
+models/coco/pairwise*
