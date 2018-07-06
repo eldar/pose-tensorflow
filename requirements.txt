@@ -1,0 +1,9 @@
+cython
+easydict
+matplotlib
+munkres
+numpy
+pyyaml
+scikit-image
+scipy
+tensorflow

@@ -1,0 +1,4 @@
+__pycache__
+models/mpii/mpii-single-resnet-101.*
+models/coco/coco-resnet-101.*
+models/coco/pairwise*
