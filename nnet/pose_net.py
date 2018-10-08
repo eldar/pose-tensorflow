@@ -3,10 +3,10 @@ import re
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from tensorflow.contrib.slim.nets import resnet_v1
+from . import losses
 
-from dataset.pose_dataset import Batch
-from nnet import losses
-
+import pose_tensorflow.dataset.pose_dataset
+Batch = pose_tensorflow.dataset.pose_dataset.Batch
 
 net_funcs = {'resnet_50': resnet_v1.resnet_v1_50,
              'resnet_101': resnet_v1.resnet_v1_101}
