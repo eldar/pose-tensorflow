@@ -4,11 +4,10 @@ import threading
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from config import load_config
-from dataset.factory import create as create_dataset
-from nnet.net_factory import pose_net
-from nnet.pose_net import get_batch_spec
-from util.logging import setup_logging
+from . import config, dataset
+import pose_tensorflow.nnet.pose_net
+from pose_tensorflow.nnet.pose_net import get_batch_spec
+from pose_tensorflow.util.logging import setup_logging
 
 
 class LearningRate(object):
@@ -42,18 +41,18 @@ def setup_preloading(batch_spec):
     return batch, enqueue_op, placeholders
 
 
-def load_and_enqueue(sess, enqueue_op, coord, dataset, placeholders):
+def load_and_enqueue(sess, enqueue_op, coord, this_dataset, placeholders):
     while not coord.should_stop():
-        batch_np = dataset.next_batch()
+        batch_np = this_dataset.next_batch()
         food = {pl: batch_np[name] for (name, pl) in placeholders.items()}
         sess.run(enqueue_op, feed_dict=food)
 
 
-def start_preloading(sess, enqueue_op, dataset, placeholders):
+def start_preloading(sess, enqueue_op, this_dataset, placeholders):
     coord = tf.train.Coordinator()
 
     t = threading.Thread(target=load_and_enqueue,
-                         args=(sess, enqueue_op, coord, dataset, placeholders))
+                         args=(sess, enqueue_op, coord, this_dataset, placeholders))
     t.start()
 
     return coord, t
@@ -73,16 +72,17 @@ def get_optimizer(loss_op, cfg):
     return learning_rate, train_op
 
 
-def train():
+def train(cfg_filename):
     setup_logging()
 
-    cfg = load_config()
-    dataset = create_dataset(cfg)
+    cfg = config.load_config(cfg_filename)
+    this_dataset = dataset.factory.create(cfg)
 
     batch_spec = get_batch_spec(cfg)
     batch, enqueue_op, placeholders = setup_preloading(batch_spec)
 
-    losses = pose_net(cfg).train(batch)
+    losses = pose_tensorflow.nnet.pose_net.PoseNet(cfg).train(batch)
+    #losses = pose_net(cfg).train(batch)
     total_loss = losses['total_loss']
 
     for k, t in losses.items():
@@ -95,7 +95,7 @@ def train():
 
     sess = tf.Session()
 
-    coord, thread = start_preloading(sess, enqueue_op, dataset, placeholders)
+    coord, thread = start_preloading(sess, enqueue_op, this_dataset, placeholders)
 
     train_writer = tf.summary.FileWriter(cfg.log_dir, sess.graph)
 
