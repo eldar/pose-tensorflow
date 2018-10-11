@@ -1,5 +1,10 @@
-from . import pose_net
+from nnet.pose_net import PoseNet
+
 
 def pose_net(cfg):
-    cls = pose_net.PoseNet
+    if cfg.video:
+        from nnet.pose_seq_net import PoseSeqNet
+        cls = PoseSeqNet
+    else:
+        cls = PoseNet
     return cls(cfg)
