@@ -5,7 +5,7 @@ import logging
 import yaml
 from easydict import EasyDict as edict
 
-from . import default_config
+import default_config
 
 
 cfg = default_config.cfg
