@@ -1,4 +1,4 @@
-from . import pose_dataset
+from dataset.pose_dataset import PoseDataset
 
 
 def create(cfg):
@@ -13,7 +13,7 @@ def create(cfg):
         from dataset.penn_action import PennAction
         data = PennAction(cfg)
     elif dataset_type == "default":
-        data = pose_dataset.PoseDataset(cfg)
+        data = PoseDataset(cfg)
     else:
         raise Exception("Unsupported dataset_type: \"{}\"".format(dataset_type))
     return data
