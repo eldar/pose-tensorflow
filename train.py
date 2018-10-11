@@ -9,7 +9,6 @@ import pose_tensorflow.nnet.pose_net
 from pose_tensorflow.nnet.pose_net import get_batch_spec
 from pose_tensorflow.util.logging import setup_logging
 
-import os
 
 class LearningRate(object):
     def __init__(self, cfg):
@@ -130,7 +129,7 @@ def train(cfg_filename):
         # Save snapshot
         if (it % cfg.save_iters == 0 and it != 0) or it == max_iter:
             model_name = cfg.snapshot_prefix
-            saver.save(sess, os.path.join('.', model_name), global_step=it)
+            saver.save(sess, model_name, global_step=it)
 
     sess.close()
     coord.request_stop()
