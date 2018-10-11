@@ -2,7 +2,7 @@ import numpy as np
 
 import tensorflow as tf
 
-from nnet.net_factory import pose_net
+from .net_factory import pose_net
 
 
 def setup_pose_prediction(cfg):
