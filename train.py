@@ -4,7 +4,7 @@ import threading
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from .config import load_config
+from .config import load_config, cfg_from_file
 from .dataset.factory import create as create_dataset
 from .nnet.net_factory import pose_net
 from .nnet.pose_net import get_batch_spec
@@ -73,10 +73,59 @@ def get_optimizer(loss_op, cfg):
     return learning_rate, train_op
 
 
-def train():
+def train(cfg_filename=None, dataset_filename=None,
+    max_to_keep=5, memfrac=None, disable_autotune=False,
+    choose_gpu=None):
+    """Train on a dataset
+    
+    cfg_filename : path to a configuration file
+        If None, it will be automatically determined by load_cfg, which
+        will look for pose_cfg.yaml either in the current directory or in
+        os.environ("POSE_PARAM_PATH")
+    
+    dataset_filename : path to a dataset, or None
+        If not None, this will override the parameter `dataset` 
+        in the configuration file.
+    
+    max_to_keep : int or None
+        Number of snapshots to keep on disk
+        See documentation at tensorflow.train.Saver
+    
+    memfrac : float or None
+        Fraction of memory to allocate on the GPU
+        Specify a value between 0.0 and 1.0. If None, all available memory
+        will be used. See additional documentation at tensorflow.ConfigProto
+    
+    disable_autotune : bool
+        If True, set the environment variable CUDNN_USE_AUTOTUNE to '0'
+    
+    choose_gpu : string, int, or None
+        If not None, set the environment variable CUDA_VISIBLE_DEVICES to this
+        It will be converted to a string first
+    """
+    # Set environment variables
+    if disable_autotune:
+        os.environ['CUDNN_USE_AUTOTUNE'] = '0'
+    
+    if choose_gpu is not None:
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(choose_gpu)
+    
+    # Set up logging
     setup_logging()
 
-    cfg = load_config()
+    # Load configuration options
+    if cfg_filename is None:
+        # Use the old load_cfg method
+        cfg = load_cfg()
+    else:
+        # Load the configuration options from the specified file
+        cfg = cfg_from_file(cfg_filename)
+    
+    # Optionally set the dataset in cfg
+    if dataset_filename is not None:
+        cfg.dataset = dataset_filename
+    
+    # Create the dataset
     dataset = create_dataset(cfg)
 
     batch_spec = get_batch_spec(cfg)
@@ -91,10 +140,18 @@ def train():
 
     variables_to_restore = slim.get_variables_to_restore(include=["resnet_v1"])
     restorer = tf.train.Saver(variables_to_restore)
-    saver = tf.train.Saver(max_to_keep=5)
+    
+    # Initialize a Saver
+    saver = tf.train.Saver(max_to_keep=max_to_keep)
 
-    sess = tf.Session()
-
+    # ConfigProto for tensorflow session
+    tfcfg = tf.ConfigProto()
+    if memfrac is not None:
+        tfcfg.gpu_options.per_process_gpu_memory_fraction = memfrac
+    
+    # Initialize the tensorflow session
+    sess = tf.Session(config=tfcfg)
+    
     coord, thread = start_preloading(sess, enqueue_op, dataset, placeholders)
 
     train_writer = tf.summary.FileWriter(cfg.log_dir, sess.graph)
