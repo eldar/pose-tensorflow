@@ -4,11 +4,11 @@ import threading
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from .config import load_config, cfg_from_file
-from .dataset.factory import create as create_dataset
-from .nnet.net_factory import pose_net
-from .nnet.pose_net import get_batch_spec
-from .util.logging import setup_logging
+from ..config import load_config, cfg_from_file
+from ..dataset.factory import create as create_dataset
+from ..nnet.net_factory import pose_net
+from ..nnet.pose_net import get_batch_spec
+from ..util.logging import setup_logging
 
 
 class LearningRate(object):
