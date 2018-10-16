@@ -192,6 +192,3 @@ def train(cfg_filename=None, dataset_filename=None,
     coord.request_stop()
     coord.join([thread])
 
-
-if __name__ == '__main__':
-    train()
