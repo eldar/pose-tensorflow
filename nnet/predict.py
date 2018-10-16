@@ -5,14 +5,23 @@ import tensorflow as tf
 from .net_factory import pose_net
 
 
-def setup_pose_prediction(cfg):
+def setup_pose_prediction(cfg, memfrac=None):
     inputs = tf.placeholder(tf.float32, shape=[cfg.batch_size, None, None, 3])
 
     outputs = pose_net(cfg).test(inputs)
 
     restorer = tf.train.Saver()
 
-    sess = tf.Session()
+
+    # CR: ConfigProto for tensorflow session
+    tfcfg = tf.ConfigProto()
+    if memfrac is not None:
+        tfcfg.gpu_options.per_process_gpu_memory_fraction = memfrac
+    
+    # CR: Initialize the tensorflow session
+    sess = tf.Session(config=tfcfg)
+
+    #sess = tf.Session()
 
     sess.run(tf.global_variables_initializer())
     sess.run(tf.local_variables_initializer())
