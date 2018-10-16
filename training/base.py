@@ -79,7 +79,7 @@ def train(cfg_filename=None, dataset_filename=None,
     """Train on a dataset
     
     cfg_filename : path to a configuration file
-        If None, it will be automatically determined by load_cfg, which
+        If None, it will be automatically determined by load_config, which
         will look for pose_cfg.yaml either in the current directory or in
         os.environ("POSE_PARAM_PATH")
     
@@ -115,8 +115,8 @@ def train(cfg_filename=None, dataset_filename=None,
 
     # Load configuration options
     if cfg_filename is None:
-        # Use the old load_cfg method
-        cfg = load_cfg()
+        # Use the old load_config method
+        cfg = load_config()
     else:
         # Load the configuration options from the specified file
         cfg = cfg_from_file(cfg_filename)
