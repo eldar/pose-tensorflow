@@ -28,6 +28,8 @@ The script and the dataset and can be located in any directory. It no longer has
 
 The old syntax `python3 ../../../train.py` still works, but is no longer necessary.
 
+Original documentation is located below.
+
 
 ![](images/teaser.png)
 
