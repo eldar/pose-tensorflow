@@ -1,4 +1,33 @@
-# Human Pose Estimation with TensorFlow
+# Pose Estimation with TensorFlow (PoseTF)
+
+## Preamble
+
+This is a fork of [@eldar's pose-tensorflow](https://github.com/eldar/pose-tensorflow) repository for tracking multiple body parts in images using the Human Body Pose Estimation algorithm. (It also works great for animal pose!)
+
+The purpose of this fork is to make the interface to the algorithm more modular and easier to integrate into a standard Python workflow.
+
+Here is an example Python script that shows how the new modular organization works.
+
+
+    # The entire module can now be imported
+    import PoseTF
+    
+    # Train a network, specifying the configuration file to use,
+    # the amount of GPU memory to request, the GPU to use, and
+    # the number of snapshots to keep on disk.
+    PoseTF.training.train(
+        cfg_filename='pose_cfg.yaml', 
+        max_to_keep=None, # Keep all snapshots!
+        memfrac=.3,
+        disable_autotune=True,
+        choose_gpu=3,
+    )
+
+
+The script and the dataset and can be located in any directory. It no longer has to be located in the "models" subdirectory in this repository.
+
+The old syntax `python3 ../../../train.py` still works, but is no longer necessary.
+
 
 ![](images/teaser.png)
 
