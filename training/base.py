@@ -98,7 +98,7 @@ def train(cfg_filename=None, dataset_filename=None,
         will be used. See additional documentation at tensorflow.ConfigProto
     
     disable_autotune : bool
-        If True, set the environment variable CUDNN_USE_AUTOTUNE to '0'
+        If True, set the environment variable TF_CUDNN_USE_AUTOTUNE to '0'
     
     choose_gpu : string, int, or None
         If not None, set the environment variable CUDA_VISIBLE_DEVICES to this
@@ -106,7 +106,7 @@ def train(cfg_filename=None, dataset_filename=None,
     """
     # Set environment variables
     if disable_autotune:
-        os.environ['CUDNN_USE_AUTOTUNE'] = '0'
+        os.environ['TF_CUDNN_USE_AUTOTUNE'] = '0'
     
     if choose_gpu is not None:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(choose_gpu)
