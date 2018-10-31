@@ -1,0 +1,6 @@
+scipy
+matplotlib
+cython
+scikit-image
+pyyaml
+tensorflow

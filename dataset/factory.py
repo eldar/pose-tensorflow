@@ -1,4 +1,4 @@
-from dataset.pose_dataset import PoseDataset
+from .pose_dataset import PoseDataset
 
 
 def create(cfg):

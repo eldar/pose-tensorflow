@@ -1,4 +1,4 @@
-from nnet.pose_net import PoseNet
+from .pose_net import PoseNet
 
 
 def pose_net(cfg):
