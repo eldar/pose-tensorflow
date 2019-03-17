@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(__file__) + "/../")
 
 from scipy.misc import imread
 
-from config import load_config
+from util.config import load_config
 from nnet import predict
 from util import visualize
 from dataset.pose_dataset import data_to_input

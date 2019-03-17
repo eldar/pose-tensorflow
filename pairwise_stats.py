@@ -2,7 +2,7 @@ import numpy as np
 
 import scipy.io
 
-from config import load_config
+from util.config import load_config
 from dataset.factory import create as create_dataset
 from dataset.pose_dataset import Batch
 

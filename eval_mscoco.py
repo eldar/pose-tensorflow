@@ -4,7 +4,7 @@ import sys
 import argparse
 import json
 
-from config import load_config
+from util.config import load_config
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path + '/lib/coco/PythonAPI')

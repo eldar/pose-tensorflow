@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
-from config import load_config
+from util.config import load_config
 from dataset.pose_dataset import Batch
 from dataset.factory import create as dataset_create
 

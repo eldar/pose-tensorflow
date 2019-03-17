@@ -9,7 +9,7 @@ import json
 from json import encoder
 encoder.FLOAT_REPR = lambda o: format(o, '.2f')
 
-from config import load_config
+from util.config import load_config
 from dataset.factory import create as create_dataset
 from dataset.pose_dataset import Batch
 from util.mscoco_util import pose_predict_with_gt_segm

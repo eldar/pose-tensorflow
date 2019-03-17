@@ -4,7 +4,7 @@ import numpy as np
 from numpy import array as arr
 import scipy.io as sio
 
-from config import load_config
+from util.config import load_config
 from dataset.factory import create as dataset_create
 
 
