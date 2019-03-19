@@ -3,7 +3,7 @@
 ![](images/teaser.png)
 
 Here you can find the implementation of the Human Body Pose Estimation algorithm,
-presented in the [ArtTrack](http://arxiv.org/abs/1612.01465) and [DeeperCut](http://arxiv.org/abs/1605.03170) papers:
+presented in the [DeeperCut](http://arxiv.org/abs/1605.03170) and [ArtTrack](http://arxiv.org/abs/1612.01465) papers:
 
 **Eldar Insafutdinov, Leonid Pishchulin, Bjoern Andres, Mykhaylo Andriluka and Bernt Schiele
 DeeperCut:  A Deeper, Stronger, and Faster Multi-Person Pose Estimation Model.
@@ -13,17 +13,29 @@ In _European Conference on Computer Vision (ECCV)_, 2016**
 ArtTrack: Articulated Multi-person Tracking in the Wild.
 In _Conference on Computer Vision and Pattern Recognition (CVPR)_, 2017**
 
+<p align="center">
+    <img style="width:50%" src="images/mpilogo-inf-narrow.png">
+</p>
+
 For more information visit http://pose.mpi-inf.mpg.de
 
-Python 3 is required to run this code.
-First of all, you should install TensorFlow as described in the
-[official documentation](https://www.tensorflow.org/install/).
-We recommended to use `virtualenv`.
+The implementation is in Python 3 and TensorFlow. We recommended using `conda` to install the dependencies.
+First, create a Python 3.6 environment:
 
-You will also need to install the following Python packages:
-
+```bash
+conda create -n py36 python=3.6
+conda activate py36
 ```
-$ pip3 install scipy scikit-image matplotlib pyyaml easydict cython munkres
+
+Then, install basic dependencies with conda:
+
+```bash
+conda install numpy scikit-image pillow scipy pyyaml matplotlib cython
+```
+
+Install TensorFlow and remaining packages with pip:
+```bash
+pip install tensorflow-gpu easydict munkres
 ```
 
 When running training or prediction scripts, please make sure to set the environment variable
