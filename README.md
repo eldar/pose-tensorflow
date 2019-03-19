@@ -14,7 +14,7 @@ ArtTrack: Articulated Multi-person Tracking in the Wild.
 In _Conference on Computer Vision and Pattern Recognition (CVPR)_, 2017**
 
 <p align="center">
-    <img width="50%" src="images/mpilogo-inf-narrow.png">
+    <a href="https://www.mpi-inf.mpg.de/departments/computer-vision-and-multimodal-computing/"><img width="50%" src="images/mpilogo-inf-narrow.png"></a>
 </p>
 
 For more information visit http://pose.mpi-inf.mpg.de
