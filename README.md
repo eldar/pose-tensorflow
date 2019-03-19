@@ -19,6 +19,8 @@ In _Conference on Computer Vision and Pattern Recognition (CVPR)_, 2017**
 
 For more information visit http://pose.mpi-inf.mpg.de
 
+## Prerequisites
+
 The implementation is in Python 3 and TensorFlow. We recommended using `conda` to install the dependencies.
 First, create a Python 3.6 environment:
 
