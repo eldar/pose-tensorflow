@@ -7,7 +7,8 @@ from numpy import array as arr
 from numpy import concatenate as cat
 
 import scipy.io as sio
-from scipy.misc import imread, imresize
+import imageio
+import scipy.ndimage
 
 
 class Batch(Enum):
@@ -248,7 +249,10 @@ class PoseDataset:
         im_file = data_item.im_path
         logging.debug('image %s', im_file)
         logging.debug('mirror %r', mirror)
-        image = imread(im_file, mode='RGB')
+        
+        # Read the image
+        # Return PIL.Image with shape (height, width, 3)
+        image = imageio.imread(im_file, pilmode='RGB')
 
         if self.has_gt:
             joints = np.copy(data_item.joints)
@@ -258,8 +262,24 @@ class PoseDataset:
             image = image[crop[1]:crop[3] + 1, crop[0]:crop[2] + 1, :]
             if self.has_gt:
                 joints[:, 1:3] -= crop[0:2].astype(joints.dtype)
-
-        img = imresize(image, scale) if scale != 1 else image
+    
+        # Resize the image
+        if scale == 1:
+            img = image
+        else:
+            # Zoom each color channel separately
+            img = np.array([
+                scipy.ndimage.zoom(image[:, :, channel], scale, mode='reflect')
+                for channel in range(image.shape[2])])
+            img = np.moveaxis(img1, 0, -1)
+            
+            #~ # Alternative method using PIL
+            #~ # PIL does (width, height) instead of (height, width)
+            #~ new_size = (
+                #~ int(np.rint(image.shape[1] * scale)),
+                #~ int(np.rint(image.shape[0] * scale)))
+            #~ img = np.array(PIL.Image.fromarray(image).resize(new_size))
+            
         scaled_img_size = arr(img.shape[0:2])
 
         if mirror:
