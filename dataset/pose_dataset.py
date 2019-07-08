@@ -271,7 +271,7 @@ class PoseDataset:
             img = np.array([
                 scipy.ndimage.zoom(image[:, :, channel], scale, mode='reflect')
                 for channel in range(image.shape[2])])
-            img = np.moveaxis(img1, 0, -1)
+            img = np.moveaxis(img, 0, -1)
             
             #~ # Alternative method using PIL
             #~ # PIL does (width, height) instead of (height, width)
