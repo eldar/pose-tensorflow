@@ -3,4 +3,5 @@ matplotlib
 cython
 scikit-image
 pyyaml
-tensorflow
+tensorflow=1.13.1
+# install easydict with pip
